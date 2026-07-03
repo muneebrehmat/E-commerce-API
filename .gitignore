@@ -368,9 +368,9 @@ obj/
 # Logs
 Logs/
 
-# User secrets
-appsettings.json
-appsettings.Development.json
+# User secrets (VERY IMPORTANT)
+**/appsettings.json
+**/appsettings.Development.json
 
 # Visual Studio
 .vs/

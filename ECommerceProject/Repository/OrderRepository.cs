@@ -71,7 +71,7 @@ namespace ECommerceProject.Repository
 
         public async Task<List<OrderResponseDto>> GetMyOrders(int userId)
         {
-            var orders = await _context.Orders.Where(u => u.UserId == userId).Select(o => new OrderResponseDto
+            var orders = await _context.Orders.AsNoTracking().Where(u => u.UserId == userId).Select(o => new OrderResponseDto
             {
                 OrderId = o.Id,
                 OrderDate = o.OrderDate,

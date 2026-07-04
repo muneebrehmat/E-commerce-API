@@ -52,7 +52,7 @@ namespace ECommerceProject.Repository
 
         public async Task<List<ProductResponseDto>> GetAllProductAsync()
         {
-            return await _context.Products
+            return await _context.Products.AsNoTracking()
                 .Select(P => new ProductResponseDto
                 {
                     Id = P.Id,

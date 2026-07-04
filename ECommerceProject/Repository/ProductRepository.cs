@@ -18,25 +18,36 @@ namespace ECommerceProject.Repository
         }
         public async Task<bool> CreateProductAsync(CreateProductDto product)
         {
-            var categoryExist = await _context.Categories.AnyAsync(c => c.Id == product.CategoryId);
-            if(!categoryExist)
+            try
             {
-                return false;
+                var categoryExist = await _context.Categories.AnyAsync(c => c.Id == product.CategoryId);
+                if (!categoryExist)
+                {
+                    _logger.LogWarning("Category with Id {CategoryId} does not exist.", product.CategoryId);
+                    return false;
+                }
+
+                _logger.LogInformation("Category exists. Creating product.");
+                var PRODUCT = new Product
+                {
+                    ProductName = product.ProductName,
+                    Price = product.Price,
+                    Stock = product.Stock,
+                    CategoryId = product.CategoryId
+                };
+
+                _logger.LogInformation("Saving new product to the database.");
+                _context.Add(PRODUCT);
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Product saved to Database successfully.");
+
+                return true;
             }
-            var PRODUCT = new Product
+            catch(Exception ex)
             {
-                ProductName = product.ProductName,
-                Price = product.Price,
-                Stock = product.Stock,
-                CategoryId = product.CategoryId
-            };
-
-            _logger.LogInformation("Saving new product to the database.");
-            _context.Add(PRODUCT);
-            await _context.SaveChangesAsync();
-            _logger.LogInformation("Product saved to Database successfully.");
-
-            return true;
+                _logger.LogError(ex, "An error occured while creating a new product.");
+                throw;
+            }
         }
 
         public async Task<bool> DeleteProductAsync(int id)

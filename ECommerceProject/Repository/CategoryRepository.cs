@@ -27,7 +27,7 @@ namespace ECommerceProject.Repository
 
         public async Task<List<CategoryResponseDto>> GetAllCategoryAsync()
         {
-            return await _context.Categories.Select(c => new CategoryResponseDto
+            return await _context.Categories.AsNoTracking().Select(c => new CategoryResponseDto
             {
                 Id = c.Id,
                 Name = c.CategoryName

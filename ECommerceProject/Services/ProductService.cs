@@ -6,15 +6,40 @@ namespace ECommerceProject.Services
     public class ProductService
     {
         private readonly IProductRepository _productRepository;
+        private readonly ILogger<ProductService> _logger;
 
-        public ProductService(IProductRepository productRepository)
+        public ProductService(IProductRepository productRepository,ILogger<ProductService> logger)
         {
+            _logger = logger;
             _productRepository = productRepository;
         }
         public async Task<bool> createProduct(CreateProductDto dto)
         {
-            var result = await _productRepository.CreateProductAsync(dto);
-            return result;
+            try
+            {
+                _logger.LogInformation("Creating a new product with name: {ProductName}", dto.ProductName);
+
+                var result = await _productRepository.CreateProductAsync(dto);
+
+                if (result)
+                {
+                    _logger.LogInformation("Product created successfully with name: {ProductName}", dto.ProductName);
+                }
+                else
+                {
+                    _logger.LogWarning("Repository returned false while creating product: {ProductName}", dto.ProductName);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "An error occurred while creating product: {ProductName}",
+                    dto.ProductName);
+
+                throw; 
+            }
         }
         public async Task<List<ProductResponseDto>> GetAllProduct()
         {

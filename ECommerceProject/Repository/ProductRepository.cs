@@ -9,9 +9,11 @@ namespace ECommerceProject.Repository
     public class ProductRepository : IProductRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<ProductRepository> _logger;
 
-        public ProductRepository(ApplicationDbContext context)
+        public ProductRepository(ApplicationDbContext context,ILogger<ProductRepository> logger)
         {
+            _logger = logger;
             _context = context;
         }
         public async Task<bool> CreateProductAsync(CreateProductDto product)
@@ -29,8 +31,11 @@ namespace ECommerceProject.Repository
                 CategoryId = product.CategoryId
             };
 
+            _logger.LogInformation("Saving new product to the database.");
             _context.Add(PRODUCT);
             await _context.SaveChangesAsync();
+            _logger.LogInformation("Product saved to Database successfully.");
+
             return true;
         }
 

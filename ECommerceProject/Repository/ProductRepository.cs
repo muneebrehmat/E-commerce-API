@@ -23,7 +23,7 @@ namespace ECommerceProject.Repository
                 var categoryExist = await _context.Categories.AnyAsync(c => c.Id == product.CategoryId);
                 if (!categoryExist)
                 {
-                    _logger.LogWarning("Category with Id {CategoryId} does not exist.", product.CategoryId);
+                    _logger.LogWarning("Category with Id {CategoryID} does not exist.", product.CategoryId);
                     return false;
                 }
 

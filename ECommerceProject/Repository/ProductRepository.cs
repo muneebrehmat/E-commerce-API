@@ -16,51 +16,57 @@ namespace ECommerceProject.Repository
             _logger = logger;
             _context = context;
         }
-        public async Task<bool> CreateProductAsync(CreateProductDto product)
+        public async Task<bool> CreateProductAsync(CreateProductDto productDto)
         {
             try
             {
-                var categoryExist = await _context.Categories.AnyAsync(c => c.Id == product.CategoryId);
-                if (!categoryExist)
+                bool categoryExists = await _context.Categories
+                    .AnyAsync(c => c.Id == productDto.CategoryId);
+
+                if (!categoryExists)
                 {
-                    _logger.LogWarning("Category with Id {CategoryID} does not exist.", product.CategoryId);
+                    _logger.LogWarning("Category with Id {CategoryId} does not exist.", productDto.CategoryId);
                     return false;
                 }
 
                 _logger.LogInformation("Category exists. Creating product.");
-                var PRODUCT = new Product
+
+                var product = new Product
                 {
-                    ProductName = product.ProductName,
-                    Price = product.Price,
-                    Stock = product.Stock,
-                    CategoryId = product.CategoryId
+                    ProductName = productDto.ProductName,
+                    Price = productDto.Price,
+                    Stock = productDto.Stock,
+                    CategoryId = productDto.CategoryId
                 };
 
+                _context.Products.Add(product);
+
                 _logger.LogInformation("Saving new product to the database.");
-                _context.Add(PRODUCT);
+
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("Product saved to Database successfully.");
+
+                _logger.LogInformation("Product saved successfully.");
 
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occured while creating a new product.");
+                _logger.LogError(ex, "An error occurred while creating a new product.");
                 throw;
             }
         }
 
         public async Task<bool> DeleteProductAsync(int id)
         {
-            var result = await _context.Products
+            var product = await _context.Products
                 .FirstOrDefaultAsync(p => p.Id == id);
 
-            if (result == null)
+            if (product == null)
             {
                 return false;
             }
 
-            _context.Products.Remove(result);
+            _context.Products.Remove(product);
             await _context.SaveChangesAsync();
 
             return true;
@@ -68,59 +74,57 @@ namespace ECommerceProject.Repository
 
         public async Task<List<ProductResponseDto>> GetAllProductAsync()
         {
-            return await _context.Products.AsNoTracking()
-                .Select(P => new ProductResponseDto
+            return await _context.Products
+                .AsNoTracking()
+                .Select(p => new ProductResponseDto
                 {
-                    Id = P.Id,
-                    ProductName = P.ProductName,
-                    Price = P.Price,
-                    Stock = P.Stock,
-                    CategoryName = P.category.CategoryName
+                    Id = p.Id,
+                    ProductName = p.ProductName,
+                    Price = p.Price,
+                    Stock = p.Stock,
+                    CategoryName = p.category.CategoryName
                 })
                 .ToListAsync();
         }
 
-        public async Task<ProductResponseDto> GetProductByIdAsync(int id)
+        public async Task<ProductResponseDto?> GetProductByIdAsync(int id)
         {
-            var product = await _context.Products.Include(P=>P.category).FirstOrDefaultAsync(P => P.Id == id);
-            if(product==null)
+            var existingProduct = await _context.Products
+                .Include(p => p.category)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (existingProduct == null)
             {
                 return null;
             }
+
             return new ProductResponseDto
             {
-                Id = product.Id,
-                ProductName = product.ProductName,
-                Price = product.Price,
-                Stock=product.Stock,
-                CategoryName = product.category.CategoryName
+                Id = existingProduct.Id,
+                ProductName = existingProduct.ProductName,
+                Price = existingProduct.Price,
+                Stock = existingProduct.Stock,
+                CategoryName = existingProduct.category.CategoryName
             };
-
         }
 
         public async Task<bool> UpdateProductAsync(int id, UpdateProductDto product)
         {
-            var P = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+            var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+            if (existingProduct == null)
+                return false;
+
             var existingCategory = await _context.Categories.FirstOrDefaultAsync(c => c.Id == product.CategoryId);
-            if(existingCategory == null)
-            {
+            if (existingCategory == null)
                 return false;
-            }
-            if(P==null)
-            {
-                return false;
-            }
-            else
-            {
-                P.ProductName = product.ProductName;
-                P.Price = product.Price;
-                P.Stock = product.Stock;
-                P.CategoryId = product.CategoryId;
 
-                await _context.SaveChangesAsync();
-                return true;
-            }
+            existingProduct.ProductName = product.ProductName;
+            existingProduct.Price = product.Price;
+            existingProduct.Stock = product.Stock;
+            existingProduct.CategoryId = product.CategoryId;
 
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

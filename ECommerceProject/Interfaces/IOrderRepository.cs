@@ -6,7 +6,7 @@ namespace ECommerceProject.Interfaces
     {
         Task<bool> CreateOrderAsync(OrderCreateDto dto,int userId);
 
-        Task<List<OrderResponseDto>> GetMyOrders(int userId);
+        Task<List<OrderResponseDto>> GetMyOrdersAsync(int userId);
 
     }
 }

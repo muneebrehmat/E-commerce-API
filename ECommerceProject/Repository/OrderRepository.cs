@@ -57,7 +57,7 @@ namespace ECommerceProject.Repository
                 }
                 await _context.SaveChangesAsync();
 
-                // Commit transaction
+               
                 await Transaction.CommitAsync();
 
                 return true;
@@ -69,24 +69,25 @@ namespace ECommerceProject.Repository
             }
         }
 
-        public async Task<List<OrderResponseDto>> GetMyOrders(int userId)
+        public async Task<List<OrderResponseDto>> GetMyOrdersAsync(int userId)
         {
-            var orders = await _context.Orders.AsNoTracking().Where(u => u.UserId == userId).Select(o => new OrderResponseDto
-            {
-                OrderId = o.Id,
-                OrderDate = o.OrderDate,
-                TotalAmount = o.OrderItem.Sum(i => i.Quantity * i.Product.Price),
-
-                Items = o.OrderItem.Select(i => new OrderItemResponseDto
+            var orders = await _context.Orders.AsNoTracking()
+                .Where(o => o.UserId == userId)
+                .Select(o => new OrderResponseDto
                 {
-                    ProductName = i.Product.ProductName,
-                    price = i.Product.Price,
-                    Quantity = i.Quantity,
-                    TotalPrice = i.Quantity * i.Product.Price
-                })
-                .ToList()
-            })
-                .ToListAsync();
+                    OrderId = o.Id,
+                    OrderDate = o.OrderDate,
+                    TotalAmount = o.OrderItem.Sum(i => i.Quantity * i.Product.Price),
+                    Items = o.OrderItem.Select(i => new OrderItemResponseDto
+                    {
+                        ProductName = i.Product.ProductName,
+                        price = i.Product.Price,
+                        Quantity = i.Quantity,
+                        TotalPrice = i.Quantity * i.Product.Price
+                    })
+                    .ToList()
+                }).ToListAsync();
+
             return orders;
         }
     }

@@ -23,7 +23,7 @@ namespace ECommerceProject.Services
         public async Task<List<OrderResponseDto>> GetAllOrders(ClaimsPrincipal user)
         {
             var userId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var orders = await _orderRepository.GetMyOrders(userId);
+            var orders = await _orderRepository.GetMyOrdersAsync(userId);
             if(!orders.Any())
             {
                 return null;

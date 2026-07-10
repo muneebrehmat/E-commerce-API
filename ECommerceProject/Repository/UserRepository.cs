@@ -13,42 +13,49 @@ namespace ECommerceProject.Repository
         private readonly ApplicationDbContext _context;
         private readonly JwtHelper _jwt;
 
-        public UserRepository(ApplicationDbContext context,JwtHelper jwt)
+        public UserRepository(ApplicationDbContext context, JwtHelper jwt)
         {
-           _context = context;
+            _context = context;
             _jwt = jwt;
         }
-        public async Task<bool> CreateUserAsync(RegistrationDto dto)
+        public async Task<bool> CreateUserAsync(RegistrationDto registrationDto)
         {
-            var ExistingUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == dto.UserName);
-            if(ExistingUser==null)
-            {
-                var CreateUser = new User
-                {
-                    UserName = dto.UserName,
-                    Email = dto.Email,
-                    Password = dto.Password,
-                    Role = "Customer"
-                };
-                _context.Users.Add(CreateUser);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            return false;
+            var existingUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.UserName == registrationDto.UserName);
 
-            
+            if (existingUser != null)
+            {
+                return false;
+            }
+
+            var user = new User
+            {
+                UserName = registrationDto.UserName,
+                Email = registrationDto.Email,
+                Password = registrationDto.Password,
+                Role = "Customer"
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
 
-        public async Task<string> LoginAsync(LoginDto dto)
+        public async Task<string?> LoginAsync(LoginDto loginDto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email && u.Password == dto.Password);
-            if(user==null)
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u =>
+                    u.Email == loginDto.Email &&
+                    u.Password == loginDto.Password);
+
+            if (user == null)
             {
                 return null;
             }
-            var token = _jwt.GenerateToken(user);
-            return token;
-           
+
+            return _jwt.GenerateToken(user);
         }
     }
 }
+   

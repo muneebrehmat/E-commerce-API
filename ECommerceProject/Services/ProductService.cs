@@ -67,5 +67,14 @@ namespace ECommerceProject.Services
             }
             return true;
         }
+        public async Task<bool> UpdateProduct(int id,UpdateProductDto dto)
+        {
+            var result = await _productRepository.UpdateProductAsync(id, dto);
+            if(result)
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }

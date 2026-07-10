@@ -45,5 +45,26 @@ namespace ECommerceProject.Controllers
             }
             return Ok(product);
         }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduct(int id)
+        {
+            var result = await _service.DeleteProduct(id);
+            if (result)
+            {
+                return Ok("Product deleted successfully");
+            }
+            return NotFound("Product Not Found");
+        }
+        [HttpPut]
+        public async Task<IActionResult> UpdateProduct(int id,UpdateProductDto dto)
+        {
+            var result = await _service.UpdateProduct(id, dto);
+            if(result)
+            {
+                return Ok("Product Update successfully");
+
+            }
+            return NotFound("Product Not Found");
+        }
     }
 }

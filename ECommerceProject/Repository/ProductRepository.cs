@@ -98,9 +98,29 @@ namespace ECommerceProject.Repository
 
         }
 
-        public Task<bool> UpdateProductAsync(int id, UpdateProductDto product)
+        public async Task<bool> UpdateProductAsync(int id, UpdateProductDto product)
         {
-            throw new NotImplementedException();
+            var P = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+            var existingCategory = await _context.Categories.FirstOrDefaultAsync(c => c.Id == product.CategoryId);
+            if(existingCategory == null)
+            {
+                return false;
+            }
+            if(P==null)
+            {
+                return false;
+            }
+            else
+            {
+                P.ProductName = product.ProductName;
+                P.Price = product.Price;
+                P.Stock = product.Stock;
+                P.CategoryId = product.CategoryId;
+
+                await _context.SaveChangesAsync();
+                return true;
+            }
+
         }
     }
 }
